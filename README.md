@@ -3,9 +3,9 @@ A pyPEG parser for HTTP request/response
 
 **1st step**: Getting used to pyPEG with simple HTTP requests (GET)
 
-## Full Grammar - following RFC 2616:
+## Full Grammar - following RFC 2616 & 3986:
 
-### Basic structure
+### General format (request or response)
 
     generic-message =   start-line
                         *(message-header CRLF)
@@ -16,18 +16,18 @@ A pyPEG parser for HTTP request/response
     field-name      =   token
     field-content   =   the OCTETs making up the field-value and consisting of either *TEXT or combinations of token, separators, and quoted-string
 
-### Getting into Request
+### Request format
 
 The request defines the action to be applied to a specified ressource, its identifier and used protocol
 
     Request             = Request-Line              
-                          *((   general-header        
+                          *(( general-header        
                             | request-header         
                             | entity-header ) CRLF) 
                           CRLF
                           [ message-body ]
 
-SP character = space which has to be indicated to pyPEG.
+SP = space character (' ') and CRLF being the combination of .. and .., indicating newline.
 
     Request-Line        =   Method SP Request-URI SP HTTP-Version CRLF
 
@@ -44,16 +44,60 @@ The method field indicates what action has to be done with the resource followin
                         |   extension-method
     extension-method    = token
 
-"The four options for Request-URI are dependent on the nature of the request."
+"The generic URI syntax consists of a hierarchical sequence of components referred to as the scheme, authority, path, query, and fragment."
+The URI format described by RFC 3986 is very generic and I chose to simplify it for this project. The structure I respected is the following.
 
-    Request-URI         =   "*" | absoluteURI | abs_path | authority
+    URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 
+Simplified all path types to a single "path" type which is described later on.  
+
+    hier-part   = "//" authority path
+
+"Scheme names consist of a sequence of characters beginning with a letter and followed by any combination of letters, digits, plus ("+"), period ("."), or hyphen ("-")."
+
+    scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+Authority model simplified from the original one (not including user info)
+
+    authority   = host [ ":" port ]
+
+Removed the IPLeteral optional, mainly consisting of IPv6 implementation. 
+
+    host        = IPv4address / reg-name
+    
+    reg-name    = 
+    IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+
+**%x31-39** and similar following field should be understood as "digit between 1 and 9" (0 and 4; 0 and 5 respectively), being percentage-encoded characters. "A percent-encoded octet is encoded as a character triplet, consisting of the percent character "%" followed by the two hexadecimal digits representing that octet's numeric value."
+
+    dec-octet   = DIGIT               ; 0-9
+                | %d1-9 DIGIT         ; 10-99
+                | "1" 2DIGIT          ; 100-199
+                | "2" %d0-4 DIGIT     ; 200-249
+                | "25" %d0-5          ; 250-255
+
+"The query component contains non-hierarchical data that, along with data in the path component, serves to identify a resource within the scope of the URI's scheme and naming authority."
+
+    query       = *( pchar 
+                   | "/" 
+                   | "?" )
+"The fragment identifier component of a URI allows indirect identification of a secondary resource by reference to a primary resource and additional identifying information.
+
+    fragment    = *( pchar 
+                   | "/" 
+                   | "?" )
+
+    pchar       = unreserved | pct-encoded | sub-delims | ":" | "@"
+    
+    unreserved  = ALPHA | DIGIT | "-" | "." | "_" | "~"
+    sub-delims  = "!" | "$" | "&" | "'" | "(" / ")"
+                  | "*" | "+" | "," | ";" | "="
 ### What about Response
 
 General structure
 
     Response            = Status-Line                
-                          *((   general-header        
+                          *(( general-header        
                             | response-header        
                             | entity-header ) CRLF)  
                           CRLF
