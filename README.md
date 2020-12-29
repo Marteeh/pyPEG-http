@@ -55,33 +55,34 @@ Simplified all path types to a single "path" type which is described later on.
 
 "Scheme names consist of a sequence of characters beginning with a letter and followed by any combination of letters, digits, plus ("+"), period ("."), or hyphen ("-")."
 
-    scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    scheme      = ALPHA *( ALPHA | DIGIT | "+" | "-" | "." )
 
+#### _Authority_
 Authority model simplified from the original one (not including user info)
 
     authority   = host [ ":" port ]
 
 Removed the IPLeteral optional, mainly consisting of IPv6 implementation. 
 
-    host        = IPv4address / reg-name
+    host        = IPv4address | reg-name
     
-    reg-name    = 
+    reg-name    = *( unreserved | pct-encoded | sub-delims )
     IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
 
 **%x31-39** and similar following field should be understood as "digit between 1 and 9" (0 and 4; 0 and 5 respectively), being percentage-encoded characters. "A percent-encoded octet is encoded as a character triplet, consisting of the percent character "%" followed by the two hexadecimal digits representing that octet's numeric value."
 
     dec-octet   = DIGIT               ; 0-9
-                | %d1-9 DIGIT         ; 10-99
-                | "1" 2DIGIT          ; 100-199
-                | "2" %d0-4 DIGIT     ; 200-249
-                | "25" %d0-5          ; 250-255
+                | %x31-39 DIGIT       ; 10-99
+                | "1" DIGIT{2}        ; 100-199
+                | "2" %x30-34 DIGIT   ; 200-249
+                | "25" %x30-35        ; 250-255
 
 "The query component contains non-hierarchical data that, along with data in the path component, serves to identify a resource within the scope of the URI's scheme and naming authority."
 
     query       = *( pchar 
                    | "/" 
                    | "?" )
-"The fragment identifier component of a URI allows indirect identification of a secondary resource by reference to a primary resource and additional identifying information.
+"The fragment identifier component of a URI allows indirect identification of a secondary resource by reference to a primary resource and additional identifying information."
 
     fragment    = *( pchar 
                    | "/" 
@@ -90,8 +91,17 @@ Removed the IPLeteral optional, mainly consisting of IPv6 implementation.
     pchar       = unreserved | pct-encoded | sub-delims | ":" | "@"
     
     unreserved  = ALPHA | DIGIT | "-" | "." | "_" | "~"
-    sub-delims  = "!" | "$" | "&" | "'" | "(" / ")"
-                  | "*" | "+" | "," | ";" | "="
+    sub-delims  = "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
+
+#### _Path_
+"The path component contains data, usually organized in hierarchical form, that, along with data in the non-hierarchical query component."
+"The path is terminated by the first question mark ("?") or number sign ("#") character, or by the end of the URI."
+Very generalized path format compared to RFC 3986's format. I considered a mix between path-abempty and path-rootless: the path can begin by "/" or a segment, and is then a succession of segments. 
+
+    path    = segment *( "/"  segment)
+
+    segment = *pchar
+
 ### What about Response
 
 General structure
