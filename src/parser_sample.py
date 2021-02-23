@@ -41,13 +41,14 @@ class DecOctet:
 class IPAddr:
     grammar = DecOctet, ".", DecOctet, ".", DecOctet, ".", DecOctet
 
+#test syntax ?
 class Host:
-    grammar = [IPAddr, RegularName]
+    grammar = attr("identifier", [IPAddr, RegularName])
 
 class Port:
     grammar = maybe_some(Digit)
 
-class Authority:
+class Auth:
     grammar = Host, maybe_some(":", Port)
 # end Authority
 
@@ -57,8 +58,10 @@ class Segment:
 class Path:
     grammar = Segment, maybe_some("/", Segment)
 #end Path
-class HierPArt:
-    grammar = "//" Authority Path
+
+class HierPart:
+    grammar = "//", Auth, Path
+
 
 #TODO: changer cette expreg (marche pas)
 class RequestURI:
