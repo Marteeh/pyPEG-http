@@ -57,6 +57,11 @@ Simplified all other paths types to a single "path" type which is described late
 
     scheme      = ALPHA *( ALPHA | DIGIT | "+" | "-" | "." )
 
+    ALPHA       = [a-zA-Z]
+    DIGIT       = [0-9]
+    SP          = [ ]
+    <">         = ["]
+
 #### _Authority_
 Authority model simplified from the original one (not including user info)
 
@@ -154,7 +159,7 @@ These tools will be useful for the following definitions:
     qvalue          = ( "0" [ "." DIGIT+ ] )
                     | ( "1" [ "." "0"+ ] )
 
-- Accept: for simplicity, I decided that the format of the Accept would be type/subtype.
+- *Accept*: "Informs the server about the types of data that can be sent back". For simplicity, I decided that the format of the Accept would be type/subtype.
 
         Accept      = "Accept" ":" type "/" subtype *(parameter) [accept-params]
 
@@ -167,7 +172,31 @@ These tools will be useful for the following definitions:
 
         accept-params   = ";" "q" "=" qvalue 
 
-- Accept-Charset: used to indicate what character sets are acceptable for the response.
+- *Accept-Charset*: used to indicate what character sets are acceptable for the response.
 "If no Accept-Charset header is present, the default is that any character set is acceptable." the `*` character matches every character set. 
 
-        Accept-Charset = "Accept-Charset" ":" ( token | "*" )[ ";" "q" "=" qvalue ] )
+        Accept-Charset  = "Accept-Charset" ":"
+                          ( ( charset | "*" )[ accept-params ] )*
+
+- *Accept-Encoding*: Similar to Accept for the encoding algorithm that can be used on the ressource that is sent back. Quality value can be associated.
+
+        Accept-Encoding = "Accept-Encoding" ":" 
+                          ( codings [ accept-params ] )*
+
+
+- *Accept-Language*: Similar to Accept. Informs the server of what is expected to be sent back. Quality value can be associated.
+
+        Accept-Language = "Accept-Language" ":"
+                          ( language-range [ accept-params ] )*
+        language-range  = ( ALPHA{,8} ("-" ALPHA{,8}) ) | "*"
+
+- *Authorization*: Contains the credentials to authenticate a user-agent with a server. I assumed that only the "Basic" authentication is used. With this method, the `credentials` field are constructed from the combination of the password and username, encoded with base64 (no encryption, reversible).
+        
+        Authorization   = "Authorization" ":" credentials
+        credentials     = [\w+]
+
+- *Expect*: Indicates expectations that need to be fulfilled by the server to properly handle the request. For example, a client can send a request with a header that indicates a large body, and wait for a 100-continue to send it. I decided not to deal with expectations extensions.
+
+        Expect                  = "Expect" ":" expectation
+        expectation             = "100-continue"
+    
