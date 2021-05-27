@@ -43,9 +43,7 @@ The method field indicates what action has to be done with the resource followin
 "The generic URI syntax consists of a hierarchical sequence of components referred to as the scheme, authority, path, query, and fragment."
 The URI format described by RFC 3986 is very generic and I chose to simplify it for this project. The structure I respected is the following.
 
-`scheme` and `path` elements are required.
-
-    URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+    URI         = [scheme ":"] hier-part [ "?" query ] [ "#" fragment ]
 
 When authority is present, the path must either be empty or begin with a slash ("/" character. When authority is not present, the path cannot begin with two slash characters ("//").
 Simplified all other paths types to a single "path" type which is described later on.  
@@ -61,17 +59,20 @@ Simplified all other paths types to a single "path" type which is described late
     DIGIT       = [0-9]
     SP          = [ ]
     <">         = ["]
+	HEXDIG 		= DIGIT |"A" | "B" | "C" | "D" | "E" | "F"
 
 #### _Authority_
-Authority model simplified from the original one (not including user info)
+Authority model from the original documentation
 
-    authority   = host [ ":" port ]
+    authority   = [ userinfo "@" ] host [ ":" port ]
 
-Removed the IPLeteral optional, mainly consisting of IPv6 implementation. 
+	userinfo	= ( unreserved | pct-encoded | sub-delims | ":" )+
+	
+Removed the IPLeteral optional field, mainly consisting of IPv6 implementation. 
 
     host        = IPv4address | reg-name
     
-    reg-name    = *( unreserved | pct-encoded | sub-delims )
+    reg-name    = ( unreserved | pct-encoded | sub-delims )+
     IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
 
 **%x31-39** and similar following field should be understood as "digit between 1 and 9" (0 and 4; 0 and 5 respectively), being percentage-encoded characters. "A percent-encoded octet is encoded as a character triplet, consisting of the percent character "%" followed by the two hexadecimal digits representing that octet's numeric value."
@@ -96,6 +97,7 @@ Removed the IPLeteral optional, mainly consisting of IPv6 implementation.
     pchar       = unreserved | pct-encoded | sub-delims | ":" | "@"
     
     unreserved  = ALPHA | DIGIT | "-" | "." | "_" | "~"
+	pct-encoded = "%" HEXDIG{2}
     sub-delims  = "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
 
 #### _Path_
