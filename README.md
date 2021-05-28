@@ -55,6 +55,8 @@ Simplified all other paths types to a single "path" type which is described late
 
     scheme      = ALPHA *( ALPHA | DIGIT | "+" | "-" | "." )
 
+Some tools before getting into the rest.
+
     ALPHA       = [a-zA-Z]
     DIGIT       = [0-9]
     SP          = [ ]
@@ -125,24 +127,15 @@ Giving the large number of possible header messages, I decided to only deal with
 "The request-header fields allow the client to pass additional information about the request, and about the client itself, to the server."
 
     request-header      = Accept                   
-                        | Accept-Charset           ; Section 14.2
-                        | Accept-Encoding          ; Section 14.3
-                        | Accept-Language          ; Section 14.4
-                        | Authorization            ; Section 14.8
-                        | Expect                   ; Section 14.20
-                        | From                     ; Section 14.22
-                        | Host                     ; Section 14.23
-                        | If-Match                 ; Section 14.24
-                        | If-Modified-Since        ; Section 14.25
-                        | If-None-Match            ; Section 14.26
-                        | If-Range                 ; Section 14.27
-                        | If-Unmodified-Since      ; Section 14.28
-                        | Max-Forwards             ; Section 14.31
-                        | Proxy-Authorization      ; Section 14.34
-                        | Range                    ; Section 14.35
-                        | Referer                  ; Section 14.36
-                        | TE                       ; Section 14.39
-                        | User-Agent               ; Section 14.43
+                        | Accept-Charset           
+                        | Accept-Encoding          
+                        | Accept-Language          
+                        | Authorization            
+                        | Expect                   
+                        | From                     
+                        | Host                     
+                        | If-Match                 
+                        | Proxy-Authorization
 
 These tools will be useful for the following definitions:
 
@@ -201,4 +194,52 @@ These tools will be useful for the following definitions:
 
         Expect                  = "Expect" ":" expectation
         expectation             = "100-continue"
+
+
+- *From*:
+
+   The From request-header field, if given, SHOULD contain an Internet
+   e-mail address for the human user who controls the requesting user
+   agent. The address SHOULD be machine-usable.
+
+       From   = "From" ":" mailbox
+
+   An example is:
+
+       From: webmaster@w3.org
+
+
+
+- *Host*: 
+
+   The Host request-header field specifies the Internet host and port number of the resource being requested. "The Host field value MUST represent the naming authority of the origin server or gateway given by the original URL". 
+
+        Host = "Host" ":" host [ ":" port ]
     
+    A "host" without any port specified implies the default port for the requested service (80 for HTTP, for example).
+    An example request using the Host field would be:
+
+            GET /pub/WWW/ HTTP/1.1
+            Host: www.w3.org
+
+    This field is important as a client MUST include a Host header field in all HTTP/1.1 request messages
+
+- *If-Match* 
+
+    This field is used with a method to make it conditionnal. The purpose of this feature is to update cached information. The special case "*" matches any current entity of the ressource. For GET and HEAD methods, the server will send back the requested resource ONLY if it matches one of the listed tags.
+
+        If-Match = "If-Match" ":" ( "*" | 1#entity-tag )
+
+    "Entity tags are used for comparing two or more entities from the samerequested resource." String of ASCII characters surrounded by double quotes (e.g. "67ab43"). It is indicated as weak if prefixed with W/, which means it represents the resource semantically but not byte-for-byte. 
+
+    Example of usage : 
+
+        If-Match: "xyzzy"
+        If-Match: "xyzzy", "r2d2xxxx", "c3piozzzz"
+        If-Match: *
+
+- *Proxy-Authorization*
+
+    This header allows the client to identify itself to a proxy that requires authentification. 
+
+        Proxy-Authorization     = "Proxy-Authorization" ":" credentials
