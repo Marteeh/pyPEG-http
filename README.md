@@ -87,14 +87,12 @@ Removed the IPLeteral optional field, mainly consisting of IPv6 implementation.
 
 "The query component contains non-hierarchical data that, along with data in the path component, serves to identify a resource within the scope of the URI's scheme and naming authority."
 
-    query       = *( pchar 
-                   | "/" 
-                   | "?" )
+    query/framgment	= *( pchar 
+					   | "/" 
+					   | "?" )
 "The fragment identifier component of a URI allows indirect identification of a secondary resource by reference to a primary resource and additional identifying information."
 
-    fragment    = *( pchar 
-                   | "/" 
-                   | "?" )
+    
 
     pchar       = unreserved | pct-encoded | sub-delims | ":" | "@"
     
@@ -128,7 +126,6 @@ Giving the large number of possible header messages, I decided to only deal with
 
     request-header      = Accept                   
                         | Accept-Charset           
-                        | Accept-Encoding          
                         | Accept-Language          
                         | Authorization            
                         | Expect                   
@@ -156,7 +153,7 @@ These tools will be useful for the following definitions:
 
 - *Accept*: "Informs the server about the types of data that can be sent back". For simplicity, I decided that the format of the Accept would be type/subtype.
 
-        Accept      = "Accept" ":" type "/" subtype *(parameter) [accept-params]
+        Accept      	= "Accept" ":" type "/" subtype *(parameter) [accept-params]
 
         type            = token
         subtype         = token
@@ -173,17 +170,11 @@ These tools will be useful for the following definitions:
         Accept-Charset  = "Accept-Charset" ":"
                           ( ( charset | "*" )[ accept-params ] )*
 
-- *Accept-Encoding*: Similar to Accept for the encoding algorithm that can be used on the ressource that is sent back. Quality value can be associated.
-
-        Accept-Encoding = "Accept-Encoding" ":" 
-                          ( codings [ accept-params ] )*
-
-
 - *Accept-Language*: Similar to Accept. Informs the server of what is expected to be sent back. Quality value can be associated.
 
         Accept-Language = "Accept-Language" ":"
                           ( language-range [ accept-params ] )*
-        language-range  = ( ALPHA{,8} ("-" ALPHA{,8}) ) | "*"
+        language-range  = ( ALPHA{,8} ("-" ALPHA{,8}) )
 
 - *Authorization*: Contains the credentials to authenticate a user-agent with a server. I assumed that only the "Basic" authentication is used. With this method, the `credentials` field are constructed from the combination of the password and username, encoded with base64 (no encryption, reversible).
         
@@ -228,7 +219,7 @@ These tools will be useful for the following definitions:
 
     This field is used with a method to make it conditionnal. The purpose of this feature is to update cached information. The special case "*" matches any current entity of the ressource. For GET and HEAD methods, the server will send back the requested resource ONLY if it matches one of the listed tags.
 
-        If-Match = "If-Match" ":" ( "*" | 1#entity-tag )
+        If-Match = "If-Match" ":" (entity-tag)*
 
     "Entity tags are used for comparing two or more entities from the samerequested resource." String of ASCII characters surrounded by double quotes (e.g. "67ab43"). It is indicated as weak if prefixed with W/, which means it represents the resource semantically but not byte-for-byte. 
 
