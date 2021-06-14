@@ -1,0 +1,3 @@
+GET /genapp/customers?name=Joe%20Bloggs/ HTTP/1.1
+Host: www.example.com
+Accept-Language: en-us

@@ -1,0 +1,2 @@
+GET /software/htp/cics/index.html HTTP/1.1
+Accept-Language: fr, de ;q=0.2
